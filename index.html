@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Планировщик баланса недели</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar" aria-label="Панель навигации и статистики">
+      <section class="week-navigation" aria-labelledby="weekNavigationTitle">
+        <h1 id="weekNavigationTitle">Баланс недели</h1>
+        <div class="week-controls">
+          <button id="prevWeekBtn" type="button">Предыдущая неделя</button>
+          <button id="todayBtn" type="button">Сегодня</button>
+          <button id="nextWeekBtn" type="button">Следующая неделя</button>
+        </div>
+        <p id="weekRange" aria-live="polite">Диапазон недели</p>
+      </section>
+
+      <section class="balance-section" aria-labelledby="balanceChartTitle">
+        <h2 id="balanceChartTitle">Колесо баланса</h2>
+        <canvas id="balanceChart" width="320" height="320" aria-label="График распределения задач по секторам"></canvas>
+        <p id="chartFallback" hidden>Недостаточно данных для отображения графика.</p>
+      </section>
+
+      <section class="stats-section" aria-labelledby="weekStatsTitle">
+        <h2 id="weekStatsTitle">Статистика</h2>
+        <dl id="weekStats">
+          <div>
+            <dt>Всего задач</dt>
+            <dd>0</dd>
+          </div>
+          <div>
+            <dt>Выполнено</dt>
+            <dd>0</dd>
+          </div>
+          <div>
+            <dt>Осталось</dt>
+            <dd>0</dd>
+          </div>
+        </dl>
+      </section>
+    </aside>
+
+    <main class="main">
+      <section class="task-entry" aria-labelledby="taskFormTitle">
+        <p id="todayDate">Сегодня</p>
+        <h2 id="taskFormTitle">Добавить задачу</h2>
+        <form id="taskForm" novalidate>
+          <div class="form-field">
+            <label for="taskText">Текст задачи</label>
+            <input id="taskText" name="taskText" type="text" maxlength="300" required>
+          </div>
+
+          <div class="form-field">
+            <label for="taskDate">Дата</label>
+            <select id="taskDate" name="taskDate" required></select>
+          </div>
+
+          <div class="form-field">
+            <label for="taskSector">Сектор баланса</label>
+            <select id="taskSector" name="taskSector" required>
+              <option value="">Выберите сектор</option>
+              <option value="Здоровье">Здоровье</option>
+              <option value="Друзья">Друзья</option>
+              <option value="Семья">Семья</option>
+              <option value="Образование">Образование</option>
+              <option value="Деньги">Деньги</option>
+              <option value="Духовность">Духовность</option>
+              <option value="Личностный рост">Личностный рост</option>
+              <option value="Яркость жизни">Яркость жизни</option>
+            </select>
+          </div>
+
+          <p id="formError" role="alert" aria-live="assertive"></p>
+          <button type="submit">Добавить</button>
+        </form>
+      </section>
+
+      <section class="week-section" aria-labelledby="weekGridTitle">
+        <h2 id="weekGridTitle">Дни недели</h2>
+        <div id="weekGrid" class="week-grid">
+          <article class="day-column" data-day="monday">
+            <h3>Понедельник</h3>
+            <ul></ul>
+          </article>
+          <article class="day-column" data-day="tuesday">
+            <h3>Вторник</h3>
+            <ul></ul>
+          </article>
+          <article class="day-column" data-day="wednesday">
+            <h3>Среда</h3>
+            <ul></ul>
+          </article>
+          <article class="day-column" data-day="thursday">
+            <h3>Четверг</h3>
+            <ul></ul>
+          </article>
+          <article class="day-column" data-day="friday">
+            <h3>Пятница</h3>
+            <ul></ul>
+          </article>
+          <article class="day-column" data-day="saturday">
+            <h3>Суббота</h3>
+            <ul></ul>
+          </article>
+          <article class="day-column" data-day="sunday">
+            <h3>Воскресенье</h3>
+            <ul></ul>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="taskModal" class="modal" hidden>
+    <div class="modal-content" role="dialog" aria-modal="true" aria-labelledby="taskModalTitle">
+      <h2 id="taskModalTitle">Редактировать задачу</h2>
+
+      <div class="form-field">
+        <label for="editTaskText">Текст задачи</label>
+        <input id="editTaskText" name="editTaskText" type="text" maxlength="300" required>
+      </div>
+
+      <div class="form-field">
+        <label for="editTaskDate">Дата</label>
+        <select id="editTaskDate" name="editTaskDate" required></select>
+      </div>
+
+      <div class="form-field">
+        <label for="editTaskSector">Сектор баланса</label>
+        <select id="editTaskSector" name="editTaskSector" required>
+          <option value="">Выберите сектор</option>
+          <option value="Здоровье">Здоровье</option>
+          <option value="Друзья">Друзья</option>
+          <option value="Семья">Семья</option>
+          <option value="Образование">Образование</option>
+          <option value="Деньги">Деньги</option>
+          <option value="Духовность">Духовность</option>
+          <option value="Личностный рост">Личностный рост</option>
+          <option value="Яркость жизни">Яркость жизни</option>
+        </select>
+      </div>
+
+      <div class="form-field">
+        <label for="editTaskDone">
+          <input id="editTaskDone" name="editTaskDone" type="checkbox">
+          Задача выполнена
+        </label>
+      </div>
+
+      <div class="modal-actions">
+        <button id="saveTaskBtn" type="button">Сохранить</button>
+        <button id="cancelEditBtn" type="button">Отмена</button>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
